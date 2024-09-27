@@ -1,0 +1,17 @@
+# Artillery is a load testing tool to see if my API can handle all the load
+
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60   # Duration of the test in seconds
+      arrivalRate: 20 # Requests per second
+
+scenarios:
+  - flow:
+      - get:
+          url: "/api/users/wallet"
+      - post:
+          url: "/api/donations"
+          json:
+            amount: 50
+            beneficiaryId: "{{ randomUserId }}"
