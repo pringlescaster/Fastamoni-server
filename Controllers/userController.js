@@ -8,12 +8,16 @@ export const registerUser = async (req, res) => {
     const { username, email, password, transactionPIN, phoneNumber } = req.body;
 
     try {
+        // Hash the password
         const hashedPassword = await bcrypt.hash(password, 10);
+        // Hash the transaction PIN
+        const hashedTransactionPIN = await bcrypt.hash(transactionPIN, 10);
+
         const newUser = new User({
             username,
             email,
             password: hashedPassword,
-            transactionPIN,
+            transactionPIN: hashedTransactionPIN, // Store the hashed transaction PIN
             phoneNumber
         });
 
@@ -41,30 +45,31 @@ export const loginUser = async (req, res) => {
     }
 };
 
-
-
-// Get all users with paginations
+// Get all users with pagination
 export const getAllUsers = async (req, res) => {
     const page = parseInt(req.query.page) || 1; // default page to page 1
     const limit = parseInt(req.query.limit) || 10; // default limit to 10 users per page
 
-try {
-    const skip = (page - 1) * limit;
+    try {
+        const skip = (page - 1) * limit;
 
-    const users = await User.find()
-    .select('-password')
-    .skip(skip)
-    .limit(limit);
+        const users = await User.find()
+            .select('-password')
+            .skip(skip)
+            .limit(limit);
 
-    const total = await User.countDocuments(); //Total number of users
+        const total = await User.countDocuments(); // Total number of users
 
-    res.json({ total, page, 
-        pages: Math.ceil(total / limit),
-        users
-     });
-} catch (error) {
-    res.status(500).json({ error: error.message });
-}}
+        res.json({
+            total,
+            page,
+            pages: Math.ceil(total / limit),
+            users
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+};
 
 // Get a user by ID and show transaction count
 export const getUserById = async (req, res) => {
@@ -98,7 +103,7 @@ export const getDonationsByDateRange = async (req, res) => {
         const start = new Date(startDate);
         const end = new Date(endDate);
 
-        // Validate date inputs //NAN not a number
+        // Validate date inputs
         if (isNaN(start) || isNaN(end)) {
             return res.status(400).json({ message: 'Invalid date format' });
         }
