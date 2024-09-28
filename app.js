@@ -9,13 +9,16 @@ dotenv.config();
 const app = express();
 app.use(express.json());
 
-//routers
+// Root route (GET /)
+app.get('/', (req, res) => {
+  res.send('Welcome to the Fastamoni API');
+});
+
+// Routers
 app.use('/api/users', userRoutes);
 app.use('/api', donationRoutes);
 
-
-
-const port = process.env.PORT;
+const port = process.env.PORT || 3000;
 
 mongoose
   .connect(process.env.MONGO_URI)
